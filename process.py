@@ -2,9 +2,32 @@ import rospy
 from std_msgs.msg import String
 
 state = 0
+message = "global"
+pub = rospy.Publisher('output', String, queue_size=10)
 
 def callback(data):
+    global state
+    global message
+    # global pub
     rospy.loginfo(rospy.get_caller_id() + "I heard: %s", data.data)
+
+    message = data.data
+
+    print('message: ')
+    print(message)
+
+    ###process
+    if message == 'hotword_detection1' and state == 0:#Graby
+        state = 1
+        print('state1 entered')
+    elif message == 'hotword_detection2' and state == 1:
+        state = 2
+        print('state2 entered')
+    ###
+    print('state: ')
+    print(state)
+
+    pub.publish(str(state))
 
 # def listen():
 #     rospy.init_node('listener', anonymous = True)
@@ -25,24 +48,11 @@ def callback(data):
 #         rate.sleep()
 
 def process():
-    global state
     rospy.init_node('listener', anonymous = True)
+    rospy.init_node('Talker', anonymous = True)
     message = rospy.Subscriber("hotword_detection",String, callback)
-    pub = rospy.Publisher('Talker', String, queue_size=10)
 
-    print(message)
-
-    ###process
-    if message == "hotword_detection1":#Graby
-        state = 1
-        print(state)
-    elif message == "hotword_detection2" and state == 1:
-        state = 2
-        print(state)
-    ###
-    print(state)
-
-    pub.publish(state)#_modified)
+    pub.publish(str(state))
 
     rospy.spin()
 
